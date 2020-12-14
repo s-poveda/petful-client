@@ -1,8 +1,17 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './header.css';
 
 export default function Header(props){
     return (
-        <h1 className='ui header'>Petful</h1>
+			<header className='ui grid'>
+			<div className='row'>
+        <Link to='/' className='ui huge header left floated six wide column'>Petful</Link>
+				{
+					props.location.pathname === '/' &&
+					<Link to='/adopt' className='ui button right floated three wide column'>Adopt a Pet</Link>
+				}
+			</div>
+			</header>
     );
 };
