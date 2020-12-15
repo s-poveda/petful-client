@@ -4,7 +4,7 @@ import './header.css';
 
 export default function Header(props){
     return (
-			<header className='ui grid'>
+			<header className='ui grid container'>
 			<div className='row'>
         <Link to='/' className='ui huge header left floated six wide column'>Petful</Link>
 				{
