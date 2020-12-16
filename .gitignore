@@ -3,3 +3,7 @@
 
 prettier.*
 node_modules/
+
+.vercel
+
+build/

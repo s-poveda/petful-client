@@ -7,7 +7,7 @@ async function fetchHandler(...args) {
 	return await res.json();
 }
 
-class apiService {
+export default class apiService {
 	get(url) {
 		return fetchHandler(API_BASE + url);
 	}
@@ -27,5 +27,3 @@ class apiService {
 	 });
 	}
 }
-
-module.exports = apiService;
