@@ -18,15 +18,16 @@ export default class AdoptionPage extends Component {
   #timer;
   #dropPerson = () => {
     const people = [...this.state.people];
-		people.shift();
-    this.setState({ people, canAdopt: false });
-    if (people[0] === userStorage.getItem('name')) {
+		const person = people.shift();
+		this.setState({ people });
+    if (person === userStorage.getItem('name')) {
       this.setState({ canAdopt: true });
       userStorage.deleteItem('name');
       clearInterval(this.#timer);
     }
 		if (people.length == 0) {
-				clearInterval(this.#timer);
+			userStorage.deleteItem('name');
+			clearInterval(this.#timer);
 		}
   };
 
@@ -65,6 +66,7 @@ export default class AdoptionPage extends Component {
 				canAdopt: false,
 				lastAdopted: adopted,
       });
+			userStorage.deleteItem('name');
 			this.#popUpTiming();
     } catch (error) {
 			console.log(error);
@@ -83,8 +85,8 @@ export default class AdoptionPage extends Component {
         },
         people: [...this.state.people, name],
       });
-      userStorage.setItem('name', name);
       this.#timer = setInterval(() => this.#dropPerson(), 1000);
+			userStorage.setItem('name', name);
     } catch (error) {
       this.setState({ error });
     }
