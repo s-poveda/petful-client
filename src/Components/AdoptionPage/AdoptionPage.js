@@ -6,34 +6,60 @@ import userStorage from '../../Services/userStorage';
 import './adoptionpage.css';
 
 export default class AdoptionPage extends Component {
-	#popUpTimer;
-	#popUpTiming = () => {
-		setTimeout( () => {
-			this.setState({
-				lastAdopted: '',
-			});
-		}, 4 * 1000);
-	};
+  #extraPeople = [
+    'Archembald Wawrzaszek',
+    'Oihana Salo',
+    'Damian Sciacca',
+    'Adel Rooijakkers',
+    'Íngrid Van Horn',
+  ];
+  #fillTimer;
+  #fillQueue = () => {
+    this.#fillTimer = setInterval(() => {
+      if (this.state.people.length < 4) {
+        const idx = parseInt(Math.random() * this.#extraPeople.length);
+        console.log(idx);
+        const people = [...this.state.people, this.#extraPeople[idx]];
+        this.setState({ people });
+      }
+			else {
+				if (!userStorage.getItem('name')) this.#dropPerson();
+			}
+    }, 1000);
+  };
+
+  #popUpTimer;
+  #popUpTiming = () => {
+    setTimeout(() => {
+      this.setState({
+        lastAdopted: '',
+      });
+    }, 4 * 1000);
+  };
 
   #timer;
-  #dropPerson = () => {
+  #dropPerson = async () => {
     const people = [...this.state.people];
-		const person = people.shift();
-		this.setState({ people });
+    const person = people.shift();
+    const petType = Math.random() > 0.5 ? 'cat' : 'dog';
+    await petsService.del(petType);
+    const pets = await petsService.get();
+    this.setState({ pets, people });
     if (person === userStorage.getItem('name')) {
       this.setState({ canAdopt: true });
       userStorage.deleteItem('name');
       clearInterval(this.#timer);
+      this.#fillQueue();
     }
-		if (people.length == 0) {
-			userStorage.deleteItem('name');
-			clearInterval(this.#timer);
-		}
+    if (people.length == 0) {
+      userStorage.deleteItem('name');
+      clearInterval(this.#timer);
+    }
   };
 
   state = {
     canAdopt: false,
-		lastAdopted: '',
+    lastAdopted: '',
     loading: true,
     pets: {},
     name: {
@@ -56,20 +82,19 @@ export default class AdoptionPage extends Component {
 
   onAdoptClick = async type => {
     try {
-			const adopted = this.state.pets[type].name;
+      const adopted = this.state.pets[type].name;
       await petsService.del(type);
       const pets = await petsService.get();
-			const [ _ , ...people] = [...this.state.people]
+      const [_, ...people] = [...this.state.people];
       this.setState({
         pets,
-				people,
-				canAdopt: false,
-				lastAdopted: adopted,
+        people,
+        canAdopt: false,
+        lastAdopted: adopted,
       });
-			userStorage.deleteItem('name');
-			this.#popUpTiming();
+      userStorage.deleteItem('name');
+      this.#popUpTiming();
     } catch (error) {
-			console.log(error);
       this.setState({ error });
     }
   };
@@ -86,7 +111,7 @@ export default class AdoptionPage extends Component {
         people: [...this.state.people, name],
       });
       this.#timer = setInterval(() => this.#dropPerson(), 1000);
-			userStorage.setItem('name', name);
+      userStorage.setItem('name', name);
     } catch (error) {
       this.setState({ error });
     }
@@ -104,15 +129,16 @@ export default class AdoptionPage extends Component {
     });
   }
 
-	renderAdoptedMessagePopUp() {
-		if (this.state.lastAdopted) return (
-			<PopUp>
-				<aside className='ui green huge label'>
-				{`You adopted ${this.state.lastAdopted}`}
-				</aside>
-			</PopUp>
-		);
-	}
+  renderAdoptedMessagePopUp() {
+    if (this.state.lastAdopted)
+      return (
+        <PopUp>
+          <aside className='ui green huge label'>
+            {`You adopted ${this.state.lastAdopted}`}
+          </aside>
+        </PopUp>
+      );
+  }
 
   renderPetCards() {
     return this.petTypes.map((type, i) => {
@@ -175,7 +201,11 @@ export default class AdoptionPage extends Component {
             />
           </div>
           <button
-            className={`ui button ${!this.state.name.value || !this.state.name.touched? 'disabled' : ''}`}>
+            className={`ui button ${
+              !this.state.name.value || !this.state.name.touched
+                ? 'disabled'
+                : ''
+            }`}>
             Submit
           </button>
         </form>
@@ -201,7 +231,7 @@ export default class AdoptionPage extends Component {
         </article>
         {this.renderPeopleInLine()}
         {this.renderForm()}
-				{this.renderAdoptedMessagePopUp()}
+        {this.renderAdoptedMessagePopUp()}
       </main>
     );
   }
