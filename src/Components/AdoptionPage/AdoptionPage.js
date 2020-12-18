@@ -13,19 +13,17 @@ export default class AdoptionPage extends Component {
     'Adel Rooijakkers',
     'Íngrid Van Horn',
   ];
-  #fillTimer;
   #fillQueue = () => {
-    this.#fillTimer = setInterval(() => {
-      if (this.state.people.length < 4) {
+    setInterval(() => {
+      if (this.state.people.length < 5) {
         const idx = parseInt(Math.random() * this.#extraPeople.length);
-        console.log(idx);
         const people = [...this.state.people, this.#extraPeople[idx]];
         this.setState({ people });
       }
 			else {
 				if (!userStorage.getItem('name')) this.#dropPerson();
 			}
-    }, 1000);
+    }, 5 * 1000);
   };
 
   #popUpTimer;
@@ -39,6 +37,7 @@ export default class AdoptionPage extends Component {
 
   #timer;
   #dropPerson = async () => {
+		if (this.state.canAdopt) return;
     const people = [...this.state.people];
     const person = people.shift();
     const petType = Math.random() > 0.5 ? 'cat' : 'dog';
@@ -110,7 +109,7 @@ export default class AdoptionPage extends Component {
         },
         people: [...this.state.people, name],
       });
-      this.#timer = setInterval(() => this.#dropPerson(), 1000);
+      this.#timer = setInterval(() => this.#dropPerson(), 5 * 1000);
       userStorage.setItem('name', name);
     } catch (error) {
       this.setState({ error });
