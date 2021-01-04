@@ -28,7 +28,7 @@ export default class AdoptionPage extends Component {
 			else {
 				if (!userStorage.getItem('name')) this.#dropPerson();
 			}
-    }, 1 * 1000);
+    }, 5 * 1000);
   };
 
   #popUpTimer;
@@ -44,17 +44,18 @@ export default class AdoptionPage extends Component {
   #dropPerson = async () => {
 		if (this.state.canAdopt) return;
     const people = [...this.state.people];
-    const person = people.shift();
+		if (people[0] === userStorage.getItem('name')) {
+			this.setState({ canAdopt: true });
+			userStorage.deleteItem('name');
+			clearInterval(this.#timer);
+			this.#fillQueue();
+			return;
+		}
+    people.shift();
     const petType = Math.random() > 0.5 ? 'cat' : 'dog';
     if (this.state.pets[petType] !== null) await petsService.del(petType);
     const pets = await petsService.get();
     this.setState({ pets, people });
-    if (person === userStorage.getItem('name')) {
-      this.setState({ canAdopt: true });
-      userStorage.deleteItem('name');
-      clearInterval(this.#timer);
-      this.#fillQueue();
-    }
     if (people.length == 0) {
       userStorage.deleteItem('name');
       clearInterval(this.#timer);
@@ -114,7 +115,7 @@ export default class AdoptionPage extends Component {
         },
         people: [...this.state.people, name],
       });
-      this.#timer = setInterval(() => this.#dropPerson(), 1 * 1000);
+      this.#timer = setInterval(() => this.#dropPerson(), 5 * 1000);
       userStorage.setItem('name', name);
     } catch (error) {
       this.setState({ error });
