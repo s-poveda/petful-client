@@ -24,7 +24,7 @@ export default class AdoptionPage extends Component {
 			else {
 				if (!userStorage.getItem('name')) this.#dropPerson();
 			}
-    }, .1 * 1000);
+    }, 1 * 1000);
   };
 
   #popUpTimer;
@@ -114,7 +114,7 @@ export default class AdoptionPage extends Component {
         },
         people: [...this.state.people, name],
       });
-      this.#timer = setInterval(() => this.#dropPerson(), .5 * 1000);
+      this.#timer = setInterval(() => this.#dropPerson(), 1 * 1000);
       userStorage.setItem('name', name);
     } catch (error) {
       this.setState({ error });
