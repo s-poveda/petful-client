@@ -13,8 +13,9 @@ export default class AdoptionPage extends Component {
     'Adel Rooijakkers',
     'Íngrid Van Horn',
   ];
+	#fillQueueTimer;
   #fillQueue = () => {
-    setInterval(() => {
+    this.#fillQueueTimer = setInterval(() => {
       if (this.state.people.length < 5) {
         const idx = parseInt(Math.random() * this.#extraPeople.length);
         const people = [...this.state.people, this.#extraPeople[idx]];
@@ -23,7 +24,7 @@ export default class AdoptionPage extends Component {
 			else {
 				if (!userStorage.getItem('name')) this.#dropPerson();
 			}
-    }, 5 * 1000);
+    }, .1 * 1000);
   };
 
   #popUpTimer;
@@ -41,7 +42,11 @@ export default class AdoptionPage extends Component {
     const people = [...this.state.people];
     const person = people.shift();
     const petType = Math.random() > 0.5 ? 'cat' : 'dog';
-    await petsService.del(petType);
+		if (this.state.pets.cat === null && this.state.pets.dog === null) {
+			clearInterval(this.#timer);
+			clearInterval(this.#fillQueueTimer);
+		}
+    if (this.state.pets[petType] !== null) await petsService.del(petType);
     const pets = await petsService.get();
     this.setState({ pets, people });
     if (person === userStorage.getItem('name')) {
@@ -109,7 +114,7 @@ export default class AdoptionPage extends Component {
         },
         people: [...this.state.people, name],
       });
-      this.#timer = setInterval(() => this.#dropPerson(), 5 * 1000);
+      this.#timer = setInterval(() => this.#dropPerson(), .5 * 1000);
       userStorage.setItem('name', name);
     } catch (error) {
       this.setState({ error });
@@ -142,6 +147,11 @@ export default class AdoptionPage extends Component {
   renderPetCards() {
     return this.petTypes.map((type, i) => {
       const pet = this.state.pets[type];
+			if (!pet) return (
+				<section key={i} id={`${type}-card`} className={`${type} ui centered card`}>
+					<p className='description'><em>{`No ${type} available to adopt yet.`}</em></p>
+				</section>
+			);
       return (
         <section
           key={i}
