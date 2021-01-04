@@ -16,6 +16,10 @@ export default class AdoptionPage extends Component {
 	#fillQueueTimer;
   #fillQueue = () => {
     this.#fillQueueTimer = setInterval(() => {
+			if (this.state.pets.cat === null && this.state.pets.dog === null) {
+				clearInterval(this.#timer);
+				clearInterval(this.#fillQueueTimer);
+			}
       if (this.state.people.length < 5) {
         const idx = parseInt(Math.random() * this.#extraPeople.length);
         const people = [...this.state.people, this.#extraPeople[idx]];
@@ -42,10 +46,6 @@ export default class AdoptionPage extends Component {
     const people = [...this.state.people];
     const person = people.shift();
     const petType = Math.random() > 0.5 ? 'cat' : 'dog';
-		if (this.state.pets.cat === null && this.state.pets.dog === null) {
-			clearInterval(this.#timer);
-			clearInterval(this.#fillQueueTimer);
-		}
     if (this.state.pets[petType] !== null) await petsService.del(petType);
     const pets = await petsService.get();
     this.setState({ pets, people });
